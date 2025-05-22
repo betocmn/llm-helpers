@@ -6,6 +6,32 @@ A collection of Python scripts to help with LLM development, especially for crea
 
 - Python 3.x
 
+## Setup
+
+### Virtual Environment Setup
+
+0. Install uv (required for dependency management):
+   See the [uv installation guide](https://docs.astral.sh/uv/getting-started/installation/).
+
+1. Create a virtual environment:
+   ```bash
+   uv venv --python 3.11
+   ```
+
+2. Activate the environment:
+   ```bash
+   # For zsh/bash:
+   source .venv/bin/activate
+
+   # For fish shell:
+   source .venv/bin/activate.fish
+   ```
+
+3. Install dependencies:
+   ```bash
+   uv pip install -r requirements.txt
+   ```
+
 ## Tools
 
 ### print_file_tree.py
@@ -190,6 +216,69 @@ def helper_function():
 ... [more files] ...
 ```
 
+### print_db_info.py
+
+A utility to generate a text representation of database structure and sample data for LLM prompts.
+
+#### Usage
+
+```bash
+python bin/print_db_info.py [options]
+```
+
+#### Arguments
+
+- `-H, --host`: Database host (default: localhost)
+- `-p, --port`: Database port (default: 5432)
+- `-d, --dbname`: Database name (required)
+- `-U, --user`: Database user (required)
+- `-P, --password`: Database password (if not provided, will use environment variable PGPASSWORD)
+- `-o, --output`: Output file path (default: print to stdout)
+
+#### Features
+
+- **Table Listing**: Lists all tables in the public schema of the database
+- **Column Structure**: Shows detailed column definitions for each table
+- **Sample Data**: Displays the last 10 rows from each table, ordered by modified_date if available
+- **Formatted Output**: Presents data in a clean, readable format suitable for LLM prompts
+- **Environment Variables**: Uses PGPASSWORD environment variable if password is not provided
+- **Output Options**: Can output to a file or stdout
+
+#### Examples
+
+**Generate database info for a local database:**
+```bash
+python bin/print_db_info.py -d mydb -U postgres
+```
+
+**Connect to a remote database:**
+```bash
+python bin/print_db_info.py -H db.example.com -p 5432 -d mydb -U myuser -P mypassword
+```
+
+**Save output to a file:**
+```bash
+python bin/print_db_info.py -d mydb -U postgres -o db_info.txt
+```
+
+#### Example Output
+
+```
+=========== TABLE: customers ===========
+COLUMNS:
+id integer NOT NULL DEFAULT nextval('customers_id_seq'::regclass)
+name text NOT NULL
+email text NOT NULL
+modified_date timestamp without time zone
+
+LAST 10 ROWS:
+ id |   name    |        email         |     modified_date     
+----+-----------+----------------------+-----------------------
+ 10 | Acme Inc. | acct@acme.com        | 2023-05-21 14:02:33
+  9 | Beta Ltd. | beta@example.com     | 2023-05-20 09:45:10
+...
+```
+
 ## Project Structure
 
 ```
@@ -197,8 +286,10 @@ llm-helpers/
 ├── bin/                      # Executable scripts
 │   ├── print_file_tree.py     # Directory tree visualization
 │   ├── generate_prompt_with_source_code.py  # Source code preview generator
+│   ├── print_db_info.py      # Database structure and sample data generator
 │   └── shared/               # Shared utilities
 │       └── fs_utils.py       # File system utilities
+├── requirements.txt          # Python dependencies
 └── README.md                 # This file
 ```
 
